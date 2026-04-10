@@ -1,12 +1,9 @@
-console.log('Resume type:', typeof Resume);
-console.log('Resume.create type:', typeof Resume.create);
 const express = require('express');
 const router = express.Router();
 const upload = require('../config/multer');
 const analyzeResume = require('../services/resumeAnalyzer');
 const Resume = require('../models/Resume');
 const protect = require('../middleware/authMiddleware');
-
 
 router.post('/upload', protect, (req, res) => {
   upload.single('resume')(req, res, async function (err) {
