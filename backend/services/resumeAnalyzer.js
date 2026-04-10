@@ -1,11 +1,5 @@
-// backend/services/resumeAnalyzer.js
-
 const groq = require('../config/groq');
 
-// ───────────────────────────────────────
-// FUNCTION 1: Extract text from PDF
-// Now accepts buffer instead of file path
-// ───────────────────────────────────────
 const extractTextFromPDF = (fileBuffer) => {
   return new Promise((resolve, reject) => {
     const PDFParser = require('pdf2json');
@@ -36,14 +30,10 @@ const extractTextFromPDF = (fileBuffer) => {
       reject(error);
     });
 
-    // Parse from buffer instead of file path
     pdfParser.parseBuffer(fileBuffer);
   });
 };
 
-// ───────────────────────────────────────
-// FUNCTION 2: Send text to Groq AI
-// ───────────────────────────────────────
 const analyzeWithAI = async (resumeText) => {
   const chatCompletion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
@@ -65,9 +55,7 @@ const analyzeWithAI = async (resumeText) => {
           "missingKeywords": (array of 5-6 strings),
           "summary": (string, 2 sentences)
         }
-        
-        Resume:
-        ${resumeText}`
+        Resume: ${resumeText}`
       }
     ],
     temperature: 0.7,
@@ -83,13 +71,9 @@ const analyzeWithAI = async (resumeText) => {
   return JSON.parse(cleaned);
 };
 
-// ───────────────────────────────────────
-// MAIN FUNCTION
-// ───────────────────────────────────────
 const analyzeResume = async (fileBuffer) => {
   console.log('📖 Reading PDF from memory...');
   const resumeText = await extractTextFromPDF(fileBuffer);
-
   console.log(`📝 Extracted ${resumeText.length} characters`);
 
   if (resumeText.length < 50) {
@@ -97,7 +81,6 @@ const analyzeResume = async (fileBuffer) => {
   }
 
   const analysis = await analyzeWithAI(resumeText);
-
   return { analysis, textLength: resumeText.length };
 };
 
