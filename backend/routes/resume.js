@@ -5,7 +5,6 @@ const analyzeResume = require('../services/resumeAnalyzer');
 const Resume = require('../models/Resume');
 const protect = require('../middleware/authMiddleware');
 
-// ── UPLOAD + ANALYZE ──
 router.post('/upload', protect, (req, res) => {
   upload.single('resume')(req, res, async function (err) {
     if (err) {
@@ -52,7 +51,6 @@ router.post('/upload', protect, (req, res) => {
   });
 });
 
-// ── GET ALL HISTORY ──
 router.get('/history', protect, async (req, res) => {
   try {
     const resumes = await Resume.find().sort({ createdAt: -1 });
@@ -62,7 +60,6 @@ router.get('/history', protect, async (req, res) => {
   }
 });
 
-// ── GET ONE BY ID ──
 router.get('/history/:id', protect, async (req, res) => {
   try {
     const resume = await Resume.findById(req.params.id);

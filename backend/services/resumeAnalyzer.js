@@ -33,13 +33,12 @@ const extractTextFromPDF = (fileBuffer) => {
     pdfParser.parseBuffer(fileBuffer);
   });
 };
-const analyzeWithAI = async (resumeText) => {
 
-  // Clean the text before sending to AI
+const analyzeWithAI = async (resumeText) => {
   const cleanText = resumeText
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // remove control characters
-    .replace(/\r\n/g, '\n')  // normalize line endings
-    .substring(0, 3000);     // limit text length
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replace(/\r\n/g, '\n')
+    .substring(0, 3000);
 
   const chatCompletion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
@@ -70,15 +69,12 @@ const analyzeWithAI = async (resumeText) => {
   });
 
   const responseText = chatCompletion.choices[0].message.content;
-  
-  // More aggressive cleaning
   const cleaned = responseText
     .replace(/```json/g, '')
     .replace(/```/g, '')
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     .trim();
 
-  // Find JSON object in response
   const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error('AI did not return valid JSON');
@@ -86,3 +82,18 @@ const analyzeWithAI = async (resumeText) => {
 
   return JSON.parse(jsonMatch[0]);
 };
+
+const analyzeResume = async (fileBuffer) => {
+  console.log('📖 Reading PDF from memory...');
+  const resumeText = await extractTextFromPDF(fileBuffer);
+  console.log(`📝 Extracted ${resumeText.length} characters`);
+
+  if (resumeText.length < 50) {
+    throw new Error('Could not extract enough text.');
+  }
+
+  const analysis = await analyzeWithAI(resumeText);
+  return { analysis, textLength: resumeText.length };
+};
+
+module.exports = analyzeResume;
