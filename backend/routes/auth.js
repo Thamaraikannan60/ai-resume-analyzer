@@ -3,16 +3,16 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // ✅ FIXED PATH
+const User = require('../models/User');
 
 // ───────────────────────────────────────
 // Helper: Create JWT Token
 // ───────────────────────────────────────
 const createToken = (userId) => {
   return jwt.sign(
-    { id: userId },           // payload
-    process.env.JWT_SECRET,   // secret key
-    { expiresIn: process.env.JWT_EXPIRE } // expiry
+    { id: userId },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" } // ✅ FIXED HERE
   );
 };
 
@@ -23,7 +23,6 @@ router.post('/signup', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // 1. Validate input
     if (!name || !email || !password) {
       return res.status(400).json({
         status: 'error',
@@ -31,7 +30,6 @@ router.post('/signup', async (req, res) => {
       });
     }
 
-    // 2. Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -40,13 +38,10 @@ router.post('/signup', async (req, res) => {
       });
     }
 
-    // 3. Create new user (password will be hashed automatically)
     const user = await User.create({ name, email, password });
 
-    // 4. Generate token
     const token = createToken(user._id);
 
-    // 5. Send response
     res.status(201).json({
       status: 'success',
       message: 'Account created successfully!',
@@ -59,7 +54,7 @@ router.post('/signup', async (req, res) => {
     });
 
   } catch (error) {
-    console.log("SIGNUP ERROR:", error); // ✅ DEBUG LOG
+    console.log("SIGNUP ERROR:", error);
 
     res.status(500).json({
       status: 'error',
@@ -75,7 +70,6 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Validate input
     if (!email || !password) {
       return res.status(400).json({
         status: 'error',
@@ -83,7 +77,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // 2. Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
@@ -92,7 +85,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // 3. Compare password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -101,10 +93,8 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // 4. Generate token
     const token = createToken(user._id);
 
-    // 5. Send response
     res.json({
       status: 'success',
       message: 'Login successful!',
@@ -117,7 +107,7 @@ router.post('/login', async (req, res) => {
     });
 
   } catch (error) {
-    console.log("LOGIN ERROR:", error); // ✅ DEBUG LOG
+    console.log("LOGIN ERROR:", error);
 
     res.status(500).json({
       status: 'error',

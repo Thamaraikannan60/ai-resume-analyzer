@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-baseURL: 'https://ai-resume-analyzer-oje6.onrender.com/api',
+baseURL: 'https://ai-resume-analyzer-7o2w.onrender.com/api',
   // All requests will start with this URL
   // So instead of: 'http://localhost:5000/api/auth/login'
   // We just write: '/auth/login'
