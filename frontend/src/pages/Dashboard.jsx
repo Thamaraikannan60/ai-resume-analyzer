@@ -246,7 +246,7 @@ const Dashboard = () => {
                 <div style={{
                   width: '100%',
                   height: '10px',
-                  background: '#333',
+                  background: 'var(--card)',
                   borderRadius: '10px',
                   marginTop: '10px'
                 }}>

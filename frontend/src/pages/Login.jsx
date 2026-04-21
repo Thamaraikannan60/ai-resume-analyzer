@@ -1,4 +1,3 @@
-// frontend/src/pages/Login.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../api/axios';
@@ -7,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,97 +18,43 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+
     try {
-      const response = await API.post('/auth/login', formData);
-      const { token, user } = response.data;
-      login(user, token);
+      setLoading(true);
+      const res = await API.post('/auth/login', formData);
+      login(res.data.user, res.data.token);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      setError('Invalid email or password');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <div className="bg-animated">
-        <div className="bg-orb3" />
-        <div className="bg-grid" />
+    <div className="page auth-page">
+      <div className="auth-card glass">
+
+        <h1 className="auth-title">Welcome Back 👋</h1>
+        <p className="auth-subtitle">Continue your AI resume journey</p>
+
+        {error && <div className="alert alert-error">⚠️ {error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <input className="input" name="email" type="email" placeholder="Email" onChange={handleChange} required />
+          <input className="input" name="password" type="password" placeholder="Password" onChange={handleChange} required />
+
+          <button className="btn btn-primary btn-full" disabled={loading}>
+            {loading ? 'Loading...' : '✦ Sign In'}
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          No account? <Link to="/signup">Create one</Link>
+        </p>
+
       </div>
-
-      <div className="page auth-page">
-        <div className="auth-card glass">
-
-          <div className="auth-logo">
-            <div className="auth-logo-icon">🔥</div>
-          </div>
-
-          <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">Sign in to analyze your resume with AI</p>
-
-          {error && (
-            <div className="alert alert-error">
-              <span>⚠️</span> {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label>Email Address</label>
-              <input
-                className="input"
-                type="email"
-                name="email"
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="input-group">
-              <label>Password</label>
-              <input
-                className="input"
-                type="password"
-                name="password"
-                placeholder="Your password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary btn-full"
-              style={{ padding: 16, fontSize: 16, marginTop: 8 }}
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading-dots" style={{ marginTop: 16 }}>
-                  <span /><span /><span />
-                </span>
-              ) : '✦ Sign In'}
-            </button>
-          </form>
-
-          <p className="auth-footer">
-            No account?{' '}
-            <Link to="/signup">Create one free →</Link>
-          </p>
-
-          <p className="auth-footer" style={{ marginTop: 8 }}>
-            <Link to="/" style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
-              ← Back to home
-            </Link>
-          </p>
-        </div>
-      </div>
-    </>
+    </div>
   );
 };
 

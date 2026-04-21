@@ -1,4 +1,3 @@
-// frontend/src/pages/Signup.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../api/axios';
@@ -7,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const Signup = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,114 +18,49 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
-    setError('');
-    setLoading(true);
+
     try {
-      const response = await API.post('/auth/signup', formData);
-      const { token, user } = response.data;
-      login(user, token);
+      setLoading(true);
+      const res = await API.post('/auth/signup', formData);
+      login(res.data.user, res.data.token);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      setError(err.response?.data?.message || 'Signup failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <div className="bg-animated">
-        <div className="bg-orb3" />
-        <div className="bg-grid" />
+    <div className="page auth-page">
+      <div className="auth-card glass">
+
+        <h1 className="auth-title">Create Your Account ✨</h1>
+        <p className="auth-subtitle">Start analyzing your resume with AI</p>
+
+        {error && <div className="alert alert-error">⚠️ {error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <input className="input" name="name" placeholder="Full Name" onChange={handleChange} required />
+          <input className="input" name="email" type="email" placeholder="Email" onChange={handleChange} required />
+          <input className="input" name="password" type="password" placeholder="Password (min 6 chars)" onChange={handleChange} required />
+
+          <button className="btn btn-primary btn-full" disabled={loading}>
+            {loading ? 'Loading...' : '✦ Get Started'}
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Already have an account? <Link to="/login">Sign In</Link>
+        </p>
+
       </div>
-
-      <div className="page auth-page">
-        <div className="auth-card glass">
-
-          <div className="auth-logo">
-            <div className="auth-logo-icon">✨</div>
-          </div>
-
-          <h1 className="auth-title">Create Account</h1>
-          <p className="auth-subtitle">Get AI-powered feedback on your resume</p>
-
-          {error && (
-            <div className="alert alert-error">
-              <span>⚠️</span> {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label>Full Name</label>
-              <input
-                className="input"
-                type="text"
-                name="name"
-                placeholder="Your full name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="input-group">
-              <label>Email Address</label>
-              <input
-                className="input"
-                type="email"
-                name="email"
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="input-group">
-              <label>Password</label>
-              <input
-                className="input"
-                type="password"
-                name="password"
-                placeholder="Min. 6 characters"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary btn-full"
-              style={{ padding: 16, fontSize: 16, marginTop: 8 }}
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading-dots" style={{ marginTop: 16 }}>
-                  <span /><span /><span />
-                </span>
-              ) : '✦ Get Started Free'}
-            </button>
-          </form>
-
-          <p className="auth-footer">
-            Already have an account?{' '}
-            <Link to="/login">Sign in →</Link>
-          </p>
-
-          <p className="auth-footer" style={{ marginTop: 8 }}>
-            <Link to="/" style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
-              ← Back to home
-            </Link>
-          </p>
-        </div>
-      </div>
-    </>
+    </div>
   );
 };
 
